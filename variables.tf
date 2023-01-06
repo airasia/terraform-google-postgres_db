@@ -292,7 +292,7 @@ variable "insights_config" {
 }
 
 variable "encryption_key_name" {
-  description = "Encryption key is required for replica in different region. For replica in same region as master set encryption_key_name = null"
+  description = "Encryption key is required for replicas in different regions. For replicas in same region as master, set encryption_key_name = null"
   type        = string
-  default     = "null"
+  default     = null
 }
