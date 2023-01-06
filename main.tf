@@ -93,6 +93,7 @@ module "google_postgres_db" {
   # read replica settings
   read_replica_deletion_protection = var.deletion_protection_read_replica
   read_replica_name_suffix         = local.read_replica_name_suffix
+  encryption_key_name              = var.encryption_key_name
   read_replicas = [
     for array_index in range(var.read_replica_count) : {
       name = array_index
