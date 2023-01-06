@@ -93,12 +93,12 @@ module "google_postgres_db" {
   # read replica settings
   read_replica_deletion_protection = var.deletion_protection_read_replica
   read_replica_name_suffix         = local.read_replica_name_suffix
-  encryption_key_name              = var.encryption_key_name
   read_replicas = [
     for array_index in range(var.read_replica_count) : {
-      name = array_index
-      tier = var.instance_size_read_replica
-      zone = local.zone_read_replica
+      name                = array_index
+      tier                = var.instance_size_read_replica
+      zone                = local.zone_read_replica
+      encryption_key_name = var.encryption_key_name
       ip_configuration = {
         authorized_networks = local.read_replica_authorized_networks
         ipv4_enabled        = var.public_access_read_replica
