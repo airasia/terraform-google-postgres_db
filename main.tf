@@ -95,9 +95,10 @@ module "google_postgres_db" {
   read_replica_name_suffix         = local.read_replica_name_suffix
   read_replicas = [
     for array_index in range(var.read_replica_count) : {
-      name = array_index
-      tier = var.instance_size_read_replica
-      zone = local.zone_read_replica
+      name                = array_index
+      tier                = var.instance_size_read_replica
+      zone                = local.zone_read_replica
+      encryption_key_name = var.encryption_key_name_read_replica
       ip_configuration = {
         authorized_networks = local.read_replica_authorized_networks
         ipv4_enabled        = var.public_access_read_replica
