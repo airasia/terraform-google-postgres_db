@@ -43,9 +43,10 @@ resource "google_project_service" "cloudsql_api" {
 
 module "google_postgres_db" {
   source                          = "GoogleCloudPlatform/sql-db/google//modules/postgresql"
-  version                         = "9.0.0"
+  version                         = "16.1.0"
   depends_on                      = [google_project_service.compute_api, google_project_service.cloudsql_api]
   deletion_protection             = var.deletion_protection_master_instance
+  deletion_protection_enabled     = var.deletion_protection_master_instance
   project_id                      = data.google_client_config.google_client.project
   name                            = local.master_instance_name
   db_name                         = var.default_db_name
@@ -56,8 +57,10 @@ module "google_postgres_db" {
   zone                            = local.zone_master_instance
   availability_type               = var.highly_available ? "REGIONAL" : "ZONAL"
   tier                            = var.instance_size_master_instance
+  edition                         = var.edition
   disk_size                       = var.disk_size_gb_master_instance
   disk_autoresize                 = var.disk_auto_resize_master_instance
+  disk_autoresize_limit           = var.disk_auto_resize_limit_master_instance
   disk_type                       = "PD_SSD"
   create_timeout                  = var.db_timeout
   update_timeout                  = var.db_timeout
@@ -66,6 +69,8 @@ module "google_postgres_db" {
   user_password                   = var.root_user_password
   database_flags                  = local.db_flags_master_instance
   user_labels                     = var.labels_master_instance
+  connector_enforcement           = var.connector_enforcement
+  iam_users                       = var.iam_users
   additional_users                = var.additional_users
   additional_databases            = var.additional_databases
   maintenance_window_day          = var.maintenance_window.day_utc
@@ -73,10 +78,12 @@ module "google_postgres_db" {
   maintenance_window_update_track = var.maintenance_window.update_track
   insights_config                 = var.insights_config
   ip_configuration = {
-    authorized_networks = local.master_authorized_networks
-    ipv4_enabled        = var.public_access_master_instance
-    private_network     = var.private_network
-    require_ssl         = null
+    authorized_networks                           = local.master_authorized_networks
+    ipv4_enabled                                  = var.public_access_master_instance
+    private_network                               = var.private_network
+    require_ssl                                   = null
+    allocated_ip_range                            = null
+    enable_private_path_for_google_cloud_services = false
   }
 
   # backup settings
@@ -91,25 +98,29 @@ module "google_postgres_db" {
   }
 
   # read replica settings
-  read_replica_deletion_protection = var.deletion_protection_read_replica
-  read_replica_name_suffix         = local.read_replica_name_suffix
+  read_replica_deletion_protection         = var.deletion_protection_read_replica
+  read_replica_deletion_protection_enabled = var.deletion_protection_read_replica
+  read_replica_name_suffix                 = local.read_replica_name_suffix
   read_replicas = [
     for array_index in range(var.read_replica_count) : {
       name                = array_index
       tier                = var.instance_size_read_replica
+      availability_type   = var.highly_available_read_replica
       zone                = local.zone_read_replica
       encryption_key_name = var.encryption_key_name_read_replica
       ip_configuration = {
+        allocated_ip_range  = null
         authorized_networks = local.read_replica_authorized_networks
         ipv4_enabled        = var.public_access_read_replica
         private_network     = var.private_network
         require_ssl         = null
       }
-      database_flags  = local.db_flags_read_replica
-      disk_autoresize = var.disk_auto_resize_read_replica
-      disk_size       = var.disk_size_gb_read_replica
-      disk_type       = "PD_SSD"
-      user_labels     = var.labels_read_replica
+      database_flags        = local.db_flags_read_replica
+      disk_autoresize       = var.disk_auto_resize_read_replica
+      disk_autoresize_limit = var.disk_auto_resize_limit_read_replica
+      disk_size             = var.disk_size_gb_read_replica
+      disk_type             = "PD_SSD"
+      user_labels           = var.labels_read_replica
     }
   ]
 }

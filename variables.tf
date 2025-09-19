@@ -80,6 +80,12 @@ variable "instance_size_master_instance" {
   default     = "db-custom-1-3840"
 }
 
+variable "edition" {
+  description = "The edition of the instance, can be ENTERPRISE or ENTERPRISE_PLUS."
+  type        = string
+  default     = null
+}
+
 variable "instance_size_read_replica" {
   description = "The machine type/size of \"ReadReplica\" instances. See https://cloud.google.com/sql/docs/postgres/create-instance#machine-types for accepted Postgres instance types. Choose a corresponding value from the 'API tier string' column."
   type        = string
@@ -104,10 +110,22 @@ variable "disk_auto_resize_master_instance" {
   default     = false
 }
 
+variable "disk_auto_resize_limit_master_instance" {
+  description = "The maximum size to which storage can be auto increased for the master instance. The default value is 0, which means there is no limit and disk size can grow up to the maximum available storage for the instance tier."
+  type        = number
+  default     = 0
+}
+
 variable "disk_auto_resize_read_replica" {
   description = "Whether to increase disk storage size of the read replica instance(s) automatically. Increased storage size is permanent. Google charges by storage size whether that storage size is utilized or not. Recommended to set to \"true\" for production workloads."
   type        = bool
   default     = false
+}
+
+variable "disk_auto_resize_limit_read_replica" {
+  description = "The maximum size to which storage can be auto increased for the read replica instance(s). The default value is 0, which means there is no limit and disk size can grow up to the maximum available storage for the instance tier."
+  type        = number
+  default     = 0
 }
 
 variable "backup_enabled" {
@@ -130,6 +148,12 @@ variable "pit_recovery_enabled" {
 
 variable "highly_available" {
   description = "Whether the Postgres instance should be highly available (REGIONAL) or single zone. Highly Available (HA) instances will automatically failover to another zone within the region if there is an outage of the primary zone. HA instances are recommended for production use-cases and increase cost. Value of 'true' requires 'var.pit_recovery_enabled' to be 'true'."
+  type        = bool
+  default     = false
+}
+
+variable "highly_available_read_replica" {
+  description = "Whether the Postgres read replica instance(s) should be highly available (REGIONAL) or single zone. Highly Available (HA) instances will automatically failover to another zone within the region if there is an outage of the primary zone. HA instances are recommended for production use-cases and increase cost. Value of 'true' requires 'var.pit_recovery_enabled' to be 'true'."
   type        = bool
   default     = false
 }
@@ -230,24 +254,39 @@ variable "sql_proxy_user_groups" {
   default     = []
 }
 
+variable "connector_enforcement" {
+  description = "Enforce that clients use the connector library"
+  type        = bool
+  default     = false
+}
+
 variable "deletion_protection_master_instance" {
-  description = "Used to prevent Terraform from deleting the master instance. Must apply with \"false\" first before attempting to delete in the next plan-apply."
+  description = "Used to prevent from accidental deletion of the master instance across all surfaces (API, gcloud, Cloud Console and Terraform). Must apply with \"false\" first before attempting to delete in the next plan-apply."
   type        = bool
   default     = true
 }
 
 variable "deletion_protection_read_replica" {
-  description = "Used to prevent Terraform from deleting the ReadReplica. Must apply with \"false\" first before attempting to delete in the next plan-apply."
+  description = "Used to prevent from accidental deletion of the ReadReplica across all surfaces (API, gcloud, Cloud Console and Terraform). Must apply with \"false\" first before attempting to delete in the next plan-apply."
   type        = bool
   default     = true
 }
 
 variable "additional_users" {
-  description = "A list of additional users to be created in the CloudSQL instance"
+  description = "A list of additional users to be created in the CloudSQL instance. A random password would be set for the user if the `random_password` variable is set, and you cannot set both password and random_password, choose one of them."
   type = list(object({
-    name     = string
-    password = string
-    host     = string
+    name            = string
+    password        = string
+    random_password = bool
+  }))
+  default = []
+}
+
+variable "iam_users" {
+  description = "A list of IAM users to be created in your CloudSQL instance"
+  type = list(object({
+    id    = string,
+    email = string
   }))
   default = []
 }
