@@ -1,5 +1,15 @@
 terraform {
-  required_version = ">= 0.13.1" # see https://releases.hashicorp.com/terraform/
+  required_version = ">= 1.3.0" # see https://releases.hashicorp.com/terraform/
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 4.74.0" # see https://github.com/terraform-providers/terraform-provider-google/releases
+    }
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 4.74.0" # see https://github.com/terraform-providers/terraform-provider-google-beta/releases
+    }
+  }
 }
 
 locals {
@@ -26,7 +36,7 @@ locals {
   ]
   db_flags_master_instance = [for key, val in var.db_flags_master_instance : { name = key, value = val }]
   db_flags_read_replica    = [for key, val in var.db_flags_read_replica : { name = key, value = val }]
-  backup_location          = coalesce(var.backup_location, local.region_master_instance)
+  backup_location          = var.backup_enabled ? coalesce(var.backup_location, local.region_master_instance) : null
 }
 
 data "google_client_config" "google_client" {}
