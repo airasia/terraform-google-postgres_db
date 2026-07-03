@@ -3,11 +3,11 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 4.74.0" # see https://github.com/terraform-providers/terraform-provider-google/releases
+      version = ">= 7.12.0, < 8.0.0"
     }
     google-beta = {
       source  = "hashicorp/google-beta"
-      version = ">= 4.74.0" # see https://github.com/terraform-providers/terraform-provider-google-beta/releases
+      version = ">= 7.12.0, < 8.0.0"
     }
   }
 }
@@ -53,7 +53,7 @@ resource "google_project_service" "cloudsql_api" {
 
 module "google_postgres_db" {
   source                          = "GoogleCloudPlatform/sql-db/google//modules/postgresql"
-  version                         = "16.1.0"
+  version                         = "26.2.2"
   depends_on                      = [google_project_service.compute_api, google_project_service.cloudsql_api]
   deletion_protection             = var.deletion_protection_master_instance
   deletion_protection_enabled     = var.deletion_protection_master_instance
@@ -91,7 +91,7 @@ module "google_postgres_db" {
     authorized_networks                           = local.master_authorized_networks
     ipv4_enabled                                  = var.public_access_master_instance
     private_network                               = var.private_network
-    require_ssl                                   = null
+    ssl_mode                                      = null
     allocated_ip_range                            = null
     enable_private_path_for_google_cloud_services = false
   }
@@ -115,7 +115,7 @@ module "google_postgres_db" {
     for array_index in range(var.read_replica_count) : {
       name                = array_index
       tier                = var.instance_size_read_replica
-      availability_type   = var.highly_available_read_replica
+      availability_type   = var.highly_available_read_replica ? "REGIONAL" : "ZONAL"
       zone                = local.zone_read_replica
       encryption_key_name = var.encryption_key_name_read_replica
       ip_configuration = {
@@ -123,7 +123,7 @@ module "google_postgres_db" {
         authorized_networks = local.read_replica_authorized_networks
         ipv4_enabled        = var.public_access_read_replica
         private_network     = var.private_network
-        require_ssl         = null
+        ssl_mode            = null
       }
       database_flags        = local.db_flags_read_replica
       disk_autoresize       = var.disk_auto_resize_read_replica

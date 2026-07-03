@@ -1,5 +1,11 @@
 Terraform module for a Postgres CloudSQL Instance in GCP
 
+# Upgrade guide from v3.0.0 to v4.0.0
+
+This release upgrades the Cloud SQL dependency to `26.2.2` and requires Google and Google Beta providers `>= 7.12.0, < 8.0.0`.
+
+Run `terraform plan` and confirm that no Cloud SQL instance or replica replacement is proposed before applying.
+
 # Upgrade guide from v2.3.8 to v3.0.0
 
 This upgrade requires google provider [v4.74.0](https://github.com/hashicorp/terraform-provider-google/releases/tag/v4.74.0) or above which introduces the `edition` feature to `google_sql_database_instance` resources. Plan & Apply the google provider version upgrade first **before** upgrading this module version to `v3.0.0`.
