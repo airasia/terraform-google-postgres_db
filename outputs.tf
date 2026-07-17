@@ -97,3 +97,8 @@ output "public_ip_address" {
   description = "The first public (PRIMARY) IPv4 address assigned for the master instance"
   value       = module.google_postgres_db.public_ip_address
 }
+
+output "instance_psc_attachment" {
+  description = "The PSC service attachment URI created for the master instance. Use this to create PSC consumer endpoints in other projects."
+  value       = module.google_postgres_db.instance_psc_attachment
+}

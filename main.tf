@@ -94,6 +94,8 @@ module "google_postgres_db" {
     ssl_mode                                      = null
     allocated_ip_range                            = null
     enable_private_path_for_google_cloud_services = false
+    psc_enabled                                   = var.psc_enabled
+    psc_allowed_consumer_projects                 = var.psc_allowed_consumer_projects
   }
 
   # backup settings
@@ -119,11 +121,13 @@ module "google_postgres_db" {
       zone                = local.zone_read_replica
       encryption_key_name = var.encryption_key_name_read_replica
       ip_configuration = {
-        allocated_ip_range  = null
-        authorized_networks = local.read_replica_authorized_networks
-        ipv4_enabled        = var.public_access_read_replica
-        private_network     = var.private_network
-        ssl_mode            = null
+        allocated_ip_range            = null
+        authorized_networks           = local.read_replica_authorized_networks
+        ipv4_enabled                  = var.public_access_read_replica
+        private_network               = var.private_network
+        ssl_mode                      = null
+        psc_enabled                   = var.psc_enabled
+        psc_allowed_consumer_projects = var.psc_allowed_consumer_projects
       }
       database_flags        = local.db_flags_read_replica
       disk_autoresize       = var.disk_auto_resize_read_replica

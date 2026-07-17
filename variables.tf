@@ -331,6 +331,18 @@ variable "insights_config" {
   default = null
 }
 
+variable "psc_enabled" {
+  description = "Whether PSC connectivity is enabled for this Cloud SQL instance. When true, a PSC service attachment is created automatically by GCP, allowing consumer projects to connect via Private Service Connect endpoints."
+  type        = bool
+  default     = false
+}
+
+variable "psc_allowed_consumer_projects" {
+  description = "List of consumer project IDs that are allowed to create PSC endpoints for this Cloud SQL instance. Only relevant when psc_enabled is true."
+  type        = list(string)
+  default     = []
+}
+
 variable "encryption_key_name_read_replica" {
   description = "Encryption key is required for replicas in different regions. For replicas in same region as master, set encryption_key_name = null"
   type        = string
